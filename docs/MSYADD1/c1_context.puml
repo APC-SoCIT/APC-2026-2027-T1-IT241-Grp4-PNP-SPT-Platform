@@ -1,0 +1,31 @@
+@startuml System_Context_Diagram_for_PNP-SPT_Platform
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+
+title C1: System Context Diagram for PNP-SPT Platform
+
+Person(personnel, "PNP Personnel", "Law enforcement officers completing the standardized 7-module AI literacy curriculum and interacting with the AI tutor.")
+Person(admin, "Admin", "Supervisor and IT Department staff who manage training content, monitor workforce completion, verify certificates, and configure the AI assistant's scope.")
+
+System(sptPlatform, "PNP-SPT Platform", "Interoperable web application (Laravel 11 / PHP 8.2 / MySQL 9.1) on its own separate domain. Delivers a self-paced, AI-tutored 7-module curriculum and issues an verifiable certificates. Built with the technical capacity for future integration, but not currently connected to POA.")
+
+System_Ext(aiChatbot, "AI Tutor API", "Approved third-party AI API acting as a real-time virtual tutor. Receives only curriculum-scoped educational prompts, never PII.")
+SystemDb(sptDb, "SPT Database", "Dedicated MySQL 9.1 database storing only training-related records: curriculum content, progress, exam results, and certificate hashes. Never stores sensitive PNP personnel or intelligence data.")
+
+System_Ext(poaPlatform, "Police Officer Academy (POA)", "PNP's existing centralized e-learning platform. No live connection exists during development or at handover. Shown here only to represent the platform's future integration capacity — building that connection is solely the PNP IT Department's responsibility, after handover.")
+
+Rel(personnel, sptPlatform, "Registers / logs in with own account, completes modules and exams, queries AI tutor", "HTTPS")
+Rel(sptPlatform, personnel, "Course content, progress status, certificate", "HTTPS")
+
+Rel(admin, sptPlatform, "Manages training content, configures AI assistant scope, monitors dashboard", "HTTPS")
+Rel(sptPlatform, admin, "Workforce progress dashboard, certificate verification results", "HTTPS")
+
+Rel(sptPlatform, aiChatbot, "Sends course-related prompts (no PII)", "API / JSON")
+Rel(aiChatbot, sptPlatform, "Returns contextual tutoring responses", "API / JSON")
+
+Rel(sptPlatform, sptDb, "Reads/writes curriculum, progress, and certificate data", "SQL")
+
+SHOW_LEGEND()
+@enduml
