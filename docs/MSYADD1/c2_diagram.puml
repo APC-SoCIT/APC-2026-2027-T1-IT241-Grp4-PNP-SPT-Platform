@@ -1,23 +1,30 @@
-@startuml System_Container_Diagram_for_PNP-SPT_Platform
+@startuml Container_Diagram_for_PNP-SPT_Platform
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
-LAYOUT_TOP_DOWN()
+
 LAYOUT_WITH_LEGEND()
-title C2: Container Diagram for PNP-SPT Platform
-Person(personnel, "PNP Personnel", "Law enforcement officers completing the standardized 7-module AI literacy curriculum.")
-Person(admin, "Admin", "Supervisor and IT Department staff who manage training content, monitor workforce completion, verify certificates, and configure the AI assistant's scope.")
+
+title Container Diagram for PNP-SPT Platform
+
+Person(trainees, "PNP Trainees", "Register and log in, complete self-paced training modules, use the AI tutor, and claim certificates.")
+Person(supervisor, "Supervisor", "Manages training content and monitors trainee progress.")
+Person(admin, "Admin", "IT Department. Manages platform infrastructure and the AI chatbot integration.")
+
 System_Boundary(sptPlatform, "PNP-SPT Platform") {
-  Container(webApp, "Web Application", "Laravel 11, PHP 8.2", "Handles registration, authentication, course delivery, exam engine, admin dashboard, and AI prompt routing.")
-  ContainerDb(db, "Database", "MySQL 9.1", "Stores curriculum content, progress records, exam results, and certificate hashes.")
-  Container(fileStorage, "File Storage", "File Storage", "Stores scannable, verifiable certificate PDFs and course materials.")
+    Container(webApp, "Web Application", "Laravel 11, PHP 8.2", "Serves the training UI, delivers modules, tracks trainee progress, and generates barcode-verifiable certificates.")
+    ContainerDb(sptDb, "SPT Database", "MySQL 9.1", "Stores curriculum content, trainee progress, and certificate records.")
 }
-System_Ext(poaPlatform, "Police Officer Academy (POA)", "PNP's existing centralized e-learning platform. No live connection exists during development or at handover. Shown here only to represent the platform's future integration capacity.")
-System_Ext(aiChatbot, "Third-Party AI Assistant", "Approved external AI API acting as a real-time virtual tutor, restricted to approved educational content only.")
-Rel(personnel, webApp, "Registers / logs in with own account, completes modules and exams, queries AI tutor", "HTTPS")
-Rel(admin, webApp, "Manages training content, configures AI assistant scope, views workforce dashboard, verifies certificates", "HTTPS")
-Rel(webApp, db, "Reads/writes curriculum, progress, and certificate data", "SQL / Eloquent ORM")
-Rel(webApp, fileStorage, "Stores/retrieves certificate PDFs and course materials", "File I/O")
-Rel(webApp, aiChatbot, "Sends course-related prompts (no PII)", "API / JSON")
-Rel(aiChatbot, webApp, "Returns contextual tutoring responses", "API / JSON")
-Rel_D(webApp, poaPlatform, "No active connection — same technology stack maintained for future integration", "N/A")
+
+System_Ext(aiChatbot, "AI Chatbot", "Approved third-party AI API acting as a real-time virtual tutor, restricted to curriculum-scoped content only.")
+System_Ext(poa, "Police Officer Academy (POA)", "PNP's existing e-learning platform. Not connected — shown for reference only, since the platform is technically capable of future integration but no live connection exists during development or at handover.")
+
+Rel(trainees, webApp, "Registers, logs in, completes modules, queries AI tutor", "HTTPS")
+Rel(supervisor, webApp, "Manages training content, monitors progress dashboard", "HTTPS")
+Rel(admin, webApp, "Configures infrastructure and AI chatbot integration", "HTTPS")
+
+Rel(webApp, sptDb, "Reads/writes curriculum, progress, and certificate data", "SQL")
+
+Rel(webApp, aiChatbot, "Sends curriculum-scoped prompts (no PII)", "API/JSON")
+Rel(aiChatbot, webApp, "Returns contextual tutoring responses", "API/JSON")
+
 SHOW_LEGEND()
 @enduml
