@@ -1,31 +1,46 @@
-@startuml System_Context_Diagram_for_PNP-SPT_Platform
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+@startuml Context_Diagram_for_PNP-SPT_Platform
+left to right direction
+skinparam rectangle {
+  BackgroundColor<<process>> #F5F5F5
+  BorderColor<<process>> #424242
+  BackgroundColor<<trainee>> #EDE7F6
+  BorderColor<<trainee>> #673AB7
+  BackgroundColor<<supervisor>> #E0F2F1
+  BorderColor<<supervisor>> #00897B
+  BackgroundColor<<admin>> #FFF8E1
+  BorderColor<<admin>> #FFA000
+  BackgroundColor<<external>> #FBE9E7
+  BorderColor<<external>> #E64A19
+  BackgroundColor<<store>> #ECEFF1
+  BorderColor<<store>> #607D8B
+}
 
-LAYOUT_TOP_DOWN()
-LAYOUT_WITH_LEGEND()
+title Context Diagram for PNP-SPT Platform
 
-title C1: System Context Diagram for PNP-SPT Platform
+rectangle "PNP Trainees" as trainees <<trainee>>
+rectangle "Supervisor" as supervisor <<supervisor>>
+rectangle "Admin\n(IT Department)" as admin <<admin>>
+rectangle "AI Chatbot" as aiChatbot <<external>>
+rectangle "SPT Database" as sptDb <<store>>
 
-Person(personnel, "PNP Personnel", "Law enforcement officers completing the standardized 7-module AI literacy curriculum and interacting with the AI tutor.")
-Person(admin, "Admin", "Supervisor and IT Department staff who manage training content, monitor workforce completion, verify certificates, and configure the AI assistant's scope.")
+rectangle "PNP-SPT Platform\n(Central Process)" as sptPlatform <<process>>
 
-System(sptPlatform, "PNP-SPT Platform", "Interoperable web application (Laravel 11 / PHP 8.2 / MySQL 9.1) on its own separate domain. Delivers a self-paced, AI-tutored 7-module curriculum and issues an verifiable certificates. Built with the technical capacity for future integration, but not currently connected to POA.")
+trainees --> sptPlatform : Register & log in
+trainees --> sptPlatform : Submit training progress
+supervisor --> sptPlatform : Manage training content
+supervisor --> sptPlatform : Monitor training progress
+admin --> sptPlatform : Configure infrastructure
+admin --> sptPlatform : Manage AI integration
 
-System_Ext(aiChatbot, "AI Tutor API", "Approved third-party AI API acting as a real-time virtual tutor. Receives only curriculum-scoped educational prompts, never PII.")
-SystemDb(sptDb, "SPT Database", "Dedicated MySQL 9.1 database storing only training-related records: curriculum content, progress, exam results, and certificate hashes. Never stores sensitive PNP personnel or intelligence data.")
+sptPlatform --> aiChatbot : Send curriculum-scoped\nprompts (no PII)
+aiChatbot --> sptPlatform : Return tutoring responses
 
-System_Ext(poaPlatform, "Police Officer Academy (POA)", "PNP's existing centralized e-learning platform. No live connection exists during development or at handover. Shown here only to represent the platform's future integration capacity — building that connection is solely the PNP IT Department's responsibility, after handover.")
+sptPlatform --> sptDb : Read/write curriculum,\nprogress & certificate data
 
-Rel(personnel, sptPlatform, "Registers / logs in with own account, completes modules and exams, queries AI tutor", "HTTPS")
-Rel(sptPlatform, personnel, "Course content, progress status, certificate", "HTTPS")
+note bottom of sptPlatform
+  Runs on its own separate domain.
+  No live connection to POA exists
+  during development or at handover.
+end note
 
-Rel(admin, sptPlatform, "Manages training content, configures AI assistant scope, monitors dashboard", "HTTPS")
-Rel(sptPlatform, admin, "Workforce progress dashboard, certificate verification results", "HTTPS")
-
-Rel(sptPlatform, aiChatbot, "Sends course-related prompts (no PII)", "API / JSON")
-Rel(aiChatbot, sptPlatform, "Returns contextual tutoring responses", "API / JSON")
-
-Rel(sptPlatform, sptDb, "Reads/writes curriculum, progress, and certificate data", "SQL")
-
-SHOW_LEGEND()
 @enduml
