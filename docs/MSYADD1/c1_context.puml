@@ -1,46 +1,29 @@
-@startuml Context_Diagram_for_PNP-SPT_Platform
-left to right direction
-skinparam rectangle {
-  BackgroundColor<<process>> #F5F5F5
-  BorderColor<<process>> #424242
-  BackgroundColor<<trainee>> #EDE7F6
-  BorderColor<<trainee>> #673AB7
-  BackgroundColor<<supervisor>> #E0F2F1
-  BorderColor<<supervisor>> #00897B
-  BackgroundColor<<admin>> #FFF8E1
-  BorderColor<<admin>> #FFA000
-  BackgroundColor<<external>> #FBE9E7
-  BorderColor<<external>> #E64A19
-  BackgroundColor<<store>> #ECEFF1
-  BorderColor<<store>> #607D8B
-}
+@startuml System_Context_Diagram_for_PNP-SPT_Platform
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
-title Context Diagram for PNP-SPT Platform
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
 
-rectangle "PNP Trainees" as trainees <<trainee>>
-rectangle "Supervisor" as supervisor <<supervisor>>
-rectangle "Admin\n(IT Department)" as admin <<admin>>
-rectangle "AI Chatbot" as aiChatbot <<external>>
-rectangle "SPT Database" as sptDb <<store>>
+title C1: Context Diagram for PNP-SPT Platform
 
-rectangle "PNP-SPT Platform\n(Central Process)" as sptPlatform <<process>>
+Person(trainees, "PNP Trainees")
+Person(supervisor, "Supervisor")
+Person(admin, "Admin")
 
-trainees --> sptPlatform : Register & log in
-trainees --> sptPlatform : Submit training progress
-supervisor --> sptPlatform : Manage training content
-supervisor --> sptPlatform : Monitor training progress
-admin --> sptPlatform : Configure infrastructure
-admin --> sptPlatform : Manage AI integration
+System(sptPlatform, "PNP-SPT Platform")
+System_Ext(aiChatbot, "AI Chatbot API")
+SystemDb(sptDb, "SPT Database")
 
-sptPlatform --> aiChatbot : Send curriculum-scoped\nprompts (no PII)
-aiChatbot --> sptPlatform : Return tutoring responses
+' Users to System (Combined Core and Extended Use Cases)
+Rel(trainees, sptPlatform, "Learn module, monitor progress\n<<extend>> Take assessment", "HTTPS")
+Rel(supervisor, sptPlatform, "Manage training content, monitor progress\n<<extend>> Create/manage modules", "HTTPS")
+Rel(admin, sptPlatform, "Manage platform\n<<extend>> Account management", "HTTPS")
 
-sptPlatform --> sptDb : Read/write curriculum,\nprogress & certificate data
+' System to External AI (Combined Send/Receive)
+Rel(sptPlatform, aiChatbot, "Sends queries & context\n<-- Returns AI guidance", "API / JSON")
 
-note bottom of sptPlatform
-  Runs on its own separate domain.
-  No live connection to POA exists
-  during development or at handover.
-end note
+' System to Database
+Rel(sptPlatform, sptDb, "Reads/writes platform data", "SQL")
 
+SHOW_LEGEND()
 @enduml
