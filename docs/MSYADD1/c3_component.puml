@@ -1,0 +1,91 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
+
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+skinparam linetype ortho
+skinparam nodesep 100
+skinparam ranksep 130
+skinparam componentFontSize 13
+skinparam ArrowFontSize 11
+skinparam wrapWidth 200
+
+title C3: Component Diagram for PNP-SPT Platform
+
+Person(supervisor, "Supervisor", "Creates/updates content, monitors personnel progress.")
+Person(trainee, "PNP Trainees", "Completes lessons, takes assessments, monitors own progress, interacts with AI.")
+Person(admin, "Admin", "Manages platform health, security, and account status.")
+
+System_Boundary(SPTSystem, "PNP-SPT Platform") {
+
+    Container_Boundary(webapp, "Web Application (Laravel 11, PHP 8.2)") {
+        ' Row 1 - centered around Login/Register
+        Component(contentComp, "Manage Training Content", "Controller/Service", "Manages creation/updating of modules, lessons, and assessments (includes create/manage modules).")
+        Component(moduleComp, "Learn Module", "Controller/Service", "Serves the standardized 7-module curriculum and lessons; tracks lesson completion.")
+        Component(authComp, "Login/Register", "Controller/Service", "Authenticates PNP Trainees, Supervisors, and Admins into the platform and establishes their role.")
+        Component(assessComp, "Take Assessment", "Controller/Service", "Handles final assessment submissions and auto-grades against answer keys.")
+        Component(platformComp, "Manage Platform (incl. Account Mgmt)", "Controller", "Manages platform health, security, config, and individual account status; logs actions for audit.")
+
+        ' Row 2 - processing logic
+        Component(progressComp, "Monitor Progress", "Controller/Service", "Asynchronously tracks completion; serves own progress to Trainees and team progress to Supervisors.")
+        Component(certComp, "Certificate Generation", "Controller/Service", "Generates and verifies barcode-verifiable certificates.")
+        Component(aiComp, "AI Chatbot", "Service", "Forwards in-scope trainee questions and current curriculum content to the AI Chatbot API.")
+    }
+
+    ContainerDb(database, "SPT Database", "MySQL 9.1", "Stores user accounts, modules, lessons, assessment keys, progress records, and audit logs.")
+    Container(fileStorage, "File Storage", "File Storage", "Stores multimedia lesson assets and generated certificates.")
+}
+
+System_Ext(aiChatbot, "AI Chatbot API", "External Service", "Approved third-party AI service for real-time tutoring.")
+
+' ===== Force row alignment =====
+Lay_R(supervisor, trainee)
+Lay_R(trainee, admin)
+
+Lay_R(contentComp, moduleComp)
+Lay_R(moduleComp, authComp)
+Lay_R(authComp, assessComp)
+Lay_R(assessComp, platformComp)
+Lay_D(trainee, authComp)
+
+Lay_R(progressComp, certComp)
+Lay_R(certComp, aiComp)
+
+Lay_D(webapp, database)
+Lay_R(database, fileStorage)
+
+' ===== Actors into system: Login/Register (all three converge center) =====
+Rel_D(trainee, authComp, "Logs in", "HTTPS", $tags="sync")
+Rel(supervisor, authComp, "Logs in", "HTTPS", $tags="sync")
+Rel(admin, authComp, "Logs in", "HTTPS", $tags="sync")
+
+' ===== Actors into their primary feature =====
+Rel_D(supervisor, contentComp, "Creates/manages modules", "HTTPS", $tags="sync")
+Rel_D(trainee, moduleComp, "Learns modules", "HTTPS", $tags="sync")
+Rel_D(trainee, assessComp, "Takes final assessments", "HTTPS", $tags="sync")
+Rel_D(admin, platformComp, "Manages platform & accounts", "HTTPS", $tags="sync")
+Rel(trainee, progressComp, "Views own progress", "HTTPS", $tags="sync")
+Rel(supervisor, progressComp, "Filters/views personnel progress", "HTTPS", $tags="sync")
+
+' ===== Internal component flow =====
+Rel_D(moduleComp, aiComp, "Forwards in-scope questions", $tags="sync")
+Rel(contentComp, aiComp, "Keeps AI-referenced content current", $tags="sync")
+Rel_D(assessComp, progressComp, "Triggers update on pass", $tags="sync")
+Rel_R(progressComp, certComp, "Triggers on 7-module completion", $tags="sync")
+
+' ===== Component to database/storage =====
+Rel_D(authComp, database, "Confirms/creates account, logs audit", "SQL", $tags="sync")
+Rel_D(contentComp, database, "Writes module structures", "SQL", $tags="sync")
+Rel_D(moduleComp, database, "Reads module structures", "SQL", $tags="sync")
+Rel_D(moduleComp, fileStorage, "Retrieves lesson media", "File I/O", $tags="sync")
+Rel_D(assessComp, database, "Logs scores", "SQL", $tags="sync")
+Rel_D(platformComp, database, "Updates account status, logs audit", "SQL", $tags="sync")
+Rel_D(progressComp, database, "Reads/writes progress & logs", "SQL", $tags="sync")
+Rel_D(certComp, database, "Stores certificate hash", "SQL", $tags="sync")
+Rel_D(certComp, fileStorage, "Stores certificate file", "File I/O", $tags="sync")
+
+' ===== External AI =====
+Rel_R(aiComp, aiChatbot, "Sends queries & context / Returns responses", "API/JSON", $tags="sync")
+
+@enduml
