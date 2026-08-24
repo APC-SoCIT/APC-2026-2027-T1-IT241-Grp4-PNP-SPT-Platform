@@ -1,5 +1,6 @@
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
 AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
 
 LAYOUT_WITH_LEGEND()
@@ -10,8 +11,17 @@ skinparam ranksep 130
 skinparam componentFontSize 13
 skinparam ArrowFontSize 11
 skinparam wrapWidth 200
+skinparam shadowing false
+skinparam defaultTextAlignment center
 
-title C3: Component Diagram for PNP-SPT Platform
+' ===== Color styling (visual only — no content changes) =====
+UpdateElementStyle("person", $bgColor="1F3864", $fontColor="white", $borderColor="0B1E42")
+UpdateElementStyle("system", $bgColor="D6E9F8", $fontColor="1F3864", $borderColor="4E86C6")
+UpdateElementStyle("container", $bgColor="FBEEC1", $fontColor="6B5B00", $borderColor="D4B106")
+UpdateElementStyle("component", $bgColor="9DC3E6", $fontColor="0B2545", $borderColor="1F3864")
+UpdateElementStyle("external_system", $bgColor="8B1E1E", $fontColor="white", $borderColor="5C1010")
+
+title Component View: PNP-SPT Platform - Web Application
 
 Person(supervisor, "Supervisor", "Creates/updates content, monitors personnel progress.")
 Person(trainee, "PNP Trainees", "Completes lessons, takes assessments, monitors own progress, interacts with AI.")
@@ -30,7 +40,7 @@ System_Boundary(SPTSystem, "PNP-SPT Platform") {
         ' Row 2 - processing logic
         Component(progressComp, "Monitor Progress", "Controller/Service", "Asynchronously tracks completion; serves own progress to Trainees and team progress to Supervisors.")
         Component(certComp, "Certificate Generation", "Controller/Service", "Generates and verifies barcode-verifiable certificates.")
-        Component(aiComp, "AI Chatbot", "Service", "Forwards in-scope trainee questions and current curriculum content to the AI Chatbot API.")
+        Component(aiComp, "AI Tutor Routing", "Service", "Forwards in-scope trainee questions and current curriculum content to the AI Chatbot API.")
     }
 
     ContainerDb(database, "SPT Database", "MySQL 9.1", "Stores user accounts, modules, lessons, assessment keys, progress records, and audit logs.")
@@ -87,5 +97,7 @@ Rel_D(certComp, fileStorage, "Stores certificate file", "File I/O", $tags="sync"
 
 ' ===== External AI =====
 Rel_R(aiComp, aiChatbot, "Sends queries & context / Returns responses", "API/JSON", $tags="sync")
+
+footer Component View: PNP-SPT Platform - Web Application | AY 2025-2026
 
 @enduml
