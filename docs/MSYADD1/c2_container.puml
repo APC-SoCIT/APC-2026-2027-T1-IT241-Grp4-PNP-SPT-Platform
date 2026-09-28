@@ -1,0 +1,34 @@
+@startuml System_Container_Diagram_for_PNP-SPT_Platform
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+
+title C2: Container Diagram for PNP-SPT Platform
+
+Person(trainees, "PNP Trainees", "Completes lessons, takes assessments, interacts with AI, and tracks progress.")
+Person(supervisor, "Supervisor", "Creates and updates training modules, manages content, and monitors progress.")
+Person(admin, "Admin", "IT Department staff managing platform health, security, chatbot usage, and account status.")
+
+System_Boundary(sptPlatform, "PNP-SPT Platform") {
+    Container(webApp, "Web Application", "Laravel 11, PHP 8.2", "Handles account management (registration, login, 2FA, profile updates, deletion), module delivery, assessment engine, progress tracking, and AI prompt routing.")
+    ContainerDb(db, "SPT Database", "MySQL 9.1", "Stores user accounts, training modules, lessons, assessment keys, progress records, and audit logs.")
+    Container(fileStorage, "File Storage", "File Storage", "Stores multimedia lesson assets and generated barcode-verifiable certificates.")
+}
+
+System_Ext(aiChatbot, "AI Chatbot API", "Approved external AI service providing real-time, module-scoped tutoring and content referencing.")
+
+' Users to Web Application (Combined Core and Extended Use Cases)
+Rel(trainees, webApp, "Manages account (register/login, 2FA, edit info, password reset, delete), learns modules, views progress\n<<extend>> Takes final assessments", "HTTPS")
+Rel(supervisor, webApp, "Manages account, manages active content, filters progress reports\n<<extend>> Creates/manages specific modules", "HTTPS")
+Rel(admin, webApp, "Manages own account, monitors platform health and configuration\n<<extend>> Manages other user accounts (lock/disable/reinstate)", "HTTPS")
+
+' Web Application to External AI (Combined Send/Receive)
+Rel(webApp, aiChatbot, "Forwards in-scope trainee questions and curriculum context\n<-- Returns scoped educational responses", "API / JSON")
+
+' Internal Storage
+Rel(webApp, db, "Reads/writes accounts, module structures, scores, progress, and logs", "SQL / Eloquent ORM")
+Rel(webApp, fileStorage, "Retrieves lesson media and stores certificates", "File I/O")
+
+SHOW_LEGEND()
+@enduml
