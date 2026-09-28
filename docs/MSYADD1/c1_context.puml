@@ -12,18 +12,14 @@ Person(admin, "Admin")
 
 System(sptPlatform, "PNP-SPT Platform")
 System_Ext(aiChatbot, "AI Chatbot API")
-SystemDb(sptDb, "SPT Database")
 
 ' Users to System (Combined Core and Extended Use Cases)
-Rel(trainees, sptPlatform, "Learn module, monitor progress\n<<extend>> Take assessment", "HTTPS")
-Rel(supervisor, sptPlatform, "Manage training content, monitor progress\n<<extend>> Create/manage modules", "HTTPS")
-Rel(admin, sptPlatform, "Manage platform\n<<extend>> Account management", "HTTPS")
+Rel(trainees, sptPlatform, "Manage account, learn module, monitor progress\n<<extend>> Take assessment", "HTTPS")
+Rel(supervisor, sptPlatform, "Manage account, manage training content, monitor progress\n<<extend>> Create/manage modules", "HTTPS")
+Rel(admin, sptPlatform, "Manage account, manage platform\n<<extend>> Manage other accounts", "HTTPS")
 
 ' System to External AI (Combined Send/Receive)
 Rel(sptPlatform, aiChatbot, "Sends queries & context\n<-- Returns AI guidance", "API / JSON")
-
-' System to Database
-Rel(sptPlatform, sptDb, "Reads/writes platform data", "SQL")
 
 SHOW_LEGEND()
 @enduml
