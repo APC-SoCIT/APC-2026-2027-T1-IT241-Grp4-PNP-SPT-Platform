@@ -1,103 +1,56 @@
-@startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+@startuml C3_Component
+!include <C4/C4_Component>
 
-AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
+title C3 - Component Diagram: Web Application
 
-LAYOUT_WITH_LEGEND()
-LAYOUT_TOP_DOWN()
-skinparam linetype ortho
-skinparam nodesep 100
-skinparam ranksep 130
-skinparam componentFontSize 13
-skinparam ArrowFontSize 11
-skinparam wrapWidth 200
-skinparam shadowing false
-skinparam defaultTextAlignment center
+Person(trainee, "PNP Trainee")
+Person(supervisor, "Supervisor")
+Person(admin, "Admin")
 
-' ===== Color styling (visual only — no content changes) =====
-UpdateElementStyle("person", $bgColor="1F3864", $fontColor="white", $borderColor="0B1E42")
-UpdateElementStyle("system", $bgColor="D6E9F8", $fontColor="1F3864", $borderColor="4E86C6")
-UpdateElementStyle("container", $bgColor="FBEEC1", $fontColor="6B5B00", $borderColor="D4B106")
-UpdateElementStyle("component", $bgColor="9DC3E6", $fontColor="0B2545", $borderColor="1F3864")
-UpdateElementStyle("external_system", $bgColor="8B1E1E", $fontColor="white", $borderColor="5C1010")
+ContainerDb(db, "Database", "TiDB Cloud")
+ContainerDb(files, "File Storage", "AWS S3")
+System_Ext(chatbot, "AI Chatbot")
+System_Ext(email, "Email Service")
+System_Ext(auth, "Google Authenticator")
 
-title Component View: PNP-SPT Platform - Web Application
-
-Person(supervisor, "Supervisor", "Creates/updates content, monitors personnel progress.")
-Person(trainee, "PNP Trainees", "Completes lessons, takes assessments, monitors own progress, interacts with AI.")
-Person(admin, "Admin", "Manages platform health, security, and account status.")
-
-System_Boundary(SPTSystem, "PNP-SPT Platform") {
-
-    Container_Boundary(webapp, "Web Application (Laravel 11, PHP 8.2)") {
-        ' Row 1 - centered around Manage Account
-        Component(contentComp, "Manage Training Content", "Controller/Service", "Manages creation/updating of modules, lessons, and assessments (includes create/manage modules).")
-        Component(moduleComp, "Learn Module", "Controller/Service", "Serves the standardized 7-module curriculum and lessons; tracks lesson completion.")
-        Component(authComp, "Manage Account", "Controller/Service", "Registers, authenticates, and manages PNP Trainee, Supervisor, and Admin accounts — including editing account info, password reset/recovery, 2FA (Google Authenticator) setup and verification, account deletion, and Admin-driven lock/disable/reinstate actions on other accounts; establishes role-based session.")
-        Component(assessComp, "Take Assessment", "Controller/Service", "Handles final assessment submissions and auto-grades against answer keys.")
-        Component(platformComp, "Manage Platform", "Controller", "Manages platform health, security, configuration, and AI Chatbot usage; logs administrative actions for audit.")
-
-        ' Row 2 - processing logic
-        Component(progressComp, "Monitor Progress", "Controller/Service", "Asynchronously tracks completion; serves own progress to Trainees and team progress to Supervisors.")
-        Component(certComp, "Certificate Generation", "Controller/Service", "Generates and verifies barcode-verifiable certificates.")
-        Component(aiComp, "AI Tutor Routing", "Service", "Forwards in-scope trainee questions and current curriculum content to the AI Chatbot API.")
-    }
-
-    ContainerDb(database, "SPT Database", "MySQL 9.1", "Stores user accounts, modules, lessons, assessment keys, progress records, and audit logs.")
-    Container(fileStorage, "File Storage", "File Storage", "Stores multimedia lesson assets and generated certificates.")
+Container_Boundary(web, "Web Application") {
+    Component(account, "Account Manager", "Register, login, 2FA, profile, password reset")
+    Component(access, "Role Access", "Sends each role to the right dashboard")
+    Component(learn, "Learning", "Lessons and progress saving")
+    Component(assess, "Assessment", "Final exam, grading, certificates")
+    Component(monitor, "Progress Monitor", "Trainee and supervisor progress views")
+    Component(content, "Content Manager", "Create and edit courses, modules, lessons")
+    Component(platform, "Platform Admin", "Staff accounts, lock/unlock, analytics")
+    Component(assistant, "Learning Assistant", "Links lessons to the AI Chatbot")
+    Component(notify, "Notifications", "Builds and sends emails")
 }
 
-System_Ext(aiChatbot, "AI Chatbot API", "External Service", "Approved third-party AI service for real-time tutoring.")
+Rel(trainee, access, "Opens")
+Rel(supervisor, access, "Opens")
+Rel(admin, access, "Opens")
 
-' ===== Force row alignment =====
-Lay_R(supervisor, trainee)
-Lay_R(trainee, admin)
+Rel(access, account, "Requires login")
+Rel(access, learn, "Trainee")
+Rel(access, monitor, "Trainee, Supervisor")
+Rel(access, content, "Supervisor, Admin")
+Rel(access, platform, "Admin")
 
-Lay_R(contentComp, moduleComp)
-Lay_R(moduleComp, authComp)
-Lay_R(authComp, assessComp)
-Lay_R(assessComp, platformComp)
-Lay_D(trainee, authComp)
+Rel(learn, assess, "Unlocks after lessons")
+Rel(learn, assistant, "Asks for help")
+Rel(assistant, chatbot, "Sends question")
+Rel(content, assistant, "Provides approved content")
 
-Lay_R(progressComp, certComp)
-Lay_R(certComp, aiComp)
+Rel(account, auth, "Verifies code")
+Rel(account, notify, "Requests emails")
+Rel(notify, email, "Sends")
 
-Lay_D(webapp, database)
-Lay_R(database, fileStorage)
-
-' ===== Actors into system: Manage Account (all three converge center) =====
-Rel_D(trainee, authComp, "Manages account (register/login, 2FA, edit info, delete)", "HTTPS", $tags="sync")
-Rel(supervisor, authComp, "Manages account (register/login, 2FA, edit info, delete)", "HTTPS", $tags="sync")
-Rel(admin, authComp, "Manages own account (register/login, 2FA)\n<<extend>> Manages other user accounts (lock/disable/reinstate)", "HTTPS", $tags="sync")
-
-' ===== Actors into their primary feature =====
-Rel_D(supervisor, contentComp, "Creates/manages modules", "HTTPS", $tags="sync")
-Rel_D(trainee, moduleComp, "Learns modules", "HTTPS", $tags="sync")
-Rel_D(trainee, assessComp, "Takes final assessments", "HTTPS", $tags="sync")
-Rel_D(admin, platformComp, "Manages platform", "HTTPS", $tags="sync")
-Rel(trainee, progressComp, "Views own progress", "HTTPS", $tags="sync")
-Rel(supervisor, progressComp, "Filters/views personnel progress", "HTTPS", $tags="sync")
-
-' ===== Internal component flow =====
-Rel_D(moduleComp, aiComp, "Forwards in-scope questions", $tags="sync")
-Rel(contentComp, aiComp, "Keeps AI-referenced content current", $tags="sync")
-Rel_D(assessComp, progressComp, "Triggers update on pass", $tags="sync")
-Rel_R(progressComp, certComp, "Triggers on 7-module completion", $tags="sync")
-
-' ===== Component to database/storage =====
-Rel_D(authComp, database, "Creates/updates/deletes account, verifies 2FA, logs audit", "SQL", $tags="sync")
-Rel_D(contentComp, database, "Writes module structures", "SQL", $tags="sync")
-Rel_D(moduleComp, database, "Reads module structures", "SQL", $tags="sync")
-Rel_D(moduleComp, fileStorage, "Retrieves lesson media", "File I/O", $tags="sync")
-Rel_D(assessComp, database, "Logs scores", "SQL", $tags="sync")
-Rel_D(platformComp, database, "Updates platform config, logs audit", "SQL", $tags="sync")
-Rel_D(progressComp, database, "Reads/writes progress & logs", "SQL", $tags="sync")
-Rel_D(certComp, database, "Stores certificate hash", "SQL", $tags="sync")
-Rel_D(certComp, fileStorage, "Stores certificate file", "File I/O", $tags="sync")
-
-' ===== External AI =====
-Rel_R(aiComp, aiChatbot, "Sends queries & context / Returns responses", "API/JSON", $tags="sync")
-
-footer Component View: PNP-SPT Platform - Web Application | AY 2025-2026
+Rel(learn, db, "Saves progress")
+Rel(assess, db, "Saves scores")
+Rel(monitor, db, "Reads progress")
+Rel(account, db, "Reads and writes users")
+Rel(platform, db, "Updates accounts")
+Rel(content, db, "Saves content")
+Rel(content, files, "Uploads files")
+Rel(assess, files, "Saves certificates")
 
 @enduml

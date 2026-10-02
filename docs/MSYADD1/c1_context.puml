@@ -1,25 +1,24 @@
-@startuml System_Context_Diagram_for_PNP-SPT_Platform
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+@startuml C1_System_Context
+!include <C4/C4_Context>
 
-LAYOUT_TOP_DOWN()
-LAYOUT_WITH_LEGEND()
+title C1 - System Context: SPT Platform
 
-title C1: Context Diagram for PNP-SPT Platform
+Person(trainee, "PNP Trainee", "Takes AI literacy training")
+Person(supervisor, "Supervisor", "Manages content and tracks trainees")
+Person(admin, "Admin", "Manages accounts and the platform")
 
-Person(trainees, "PNP Trainees")
-Person(supervisor, "Supervisor")
-Person(admin, "Admin")
+System(spt, "SPT Platform", "Web app for AI literacy training of PNP personnel")
 
-System(sptPlatform, "PNP-SPT Platform")
-System_Ext(aiChatbot, "AI Chatbot API")
+System_Ext(chatbot, "AI Chatbot", "Answers questions about lessons")
+System_Ext(email, "Email Service", "Sends verification and reset emails")
+System_Ext(auth, "Google Authenticator", "Provides 2FA codes")
 
-' Users to System (Combined Core and Extended Use Cases)
-Rel(trainees, sptPlatform, "Manage account, learn module, monitor progress\n<<extend>> Take assessment", "HTTPS")
-Rel(supervisor, sptPlatform, "Manage account, manage training content, monitor progress\n<<extend>> Create/manage modules", "HTTPS")
-Rel(admin, sptPlatform, "Manage account, manage platform\n<<extend>> Manage other accounts", "HTTPS")
+Rel(trainee, spt, "Learns, takes assessments")
+Rel(supervisor, spt, "Manages modules, monitors progress")
+Rel(admin, spt, "Manages users and platform")
 
-' System to External AI (Combined Send/Receive)
-Rel(sptPlatform, aiChatbot, "Sends queries & context\n<-- Returns AI guidance", "API / JSON")
+Rel(spt, chatbot, "Sends lesson questions")
+Rel(spt, email, "Sends emails")
+Rel(spt, auth, "Verifies 2FA codes")
 
-SHOW_LEGEND()
 @enduml

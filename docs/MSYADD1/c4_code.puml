@@ -1,0 +1,76 @@
+@startuml C4_Code
+title C4 - Code Diagram: Content Manager
+
+class CourseController {
+  +index()
+  +store()
+  +update()
+  +destroy()
+}
+
+class ModuleController {
+  +index()
+  +store()
+  +update()
+  +destroy()
+  +viewFile()
+}
+
+class LessonController {
+  +store()
+  +update()
+  +destroy()
+}
+
+class ExamQuestionController {
+  +store()
+  +update()
+  +destroy()
+}
+
+class Course {
+  +title
+  +description
+}
+
+class Module {
+  +title
+  +file_path
+  +file_type
+}
+
+class Lesson {
+  +title
+  +content
+  +order
+}
+
+class ExamQuestion {
+  +question
+  +choices
+  +answer
+}
+
+class FileStorage <<external>> {
+  +save()
+  +delete()
+  +get()
+}
+
+CourseController --> Course
+ModuleController --> Module
+LessonController --> Lesson
+ExamQuestionController --> ExamQuestion
+
+Course "1" o-- "many" Module
+Module "1" o-- "many" Lesson
+Module "1" o-- "many" ExamQuestion
+
+ModuleController --> FileStorage : uploads / views file
+
+note right of ModuleController
+  Used by Supervisor and Admin.
+  Only PDF and MP4 files allowed.
+end note
+
+@enduml

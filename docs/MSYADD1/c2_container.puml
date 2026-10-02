@@ -1,34 +1,30 @@
-@startuml System_Container_Diagram_for_PNP-SPT_Platform
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+@startuml C2_Container
+!include <C4/C4_Container>
 
-LAYOUT_TOP_DOWN()
-LAYOUT_WITH_LEGEND()
+title C2 - Container Diagram: SPT Platform
 
-title C2: Container Diagram for PNP-SPT Platform
+Person(trainee, "PNP Trainee")
+Person(supervisor, "Supervisor")
+Person(admin, "Admin")
 
-Person(trainees, "PNP Trainees", "Completes lessons, takes assessments, interacts with AI, and tracks progress.")
-Person(supervisor, "Supervisor", "Creates and updates training modules, manages content, and monitors progress.")
-Person(admin, "Admin", "IT Department staff managing platform health, security, chatbot usage, and account status.")
-
-System_Boundary(sptPlatform, "PNP-SPT Platform") {
-    Container(webApp, "Web Application", "Laravel 11, PHP 8.2", "Handles account management (registration, login, 2FA, profile updates, deletion), module delivery, assessment engine, progress tracking, and AI prompt routing.")
-    ContainerDb(db, "SPT Database", "MySQL 9.1", "Stores user accounts, training modules, lessons, assessment keys, progress records, and audit logs.")
-    Container(fileStorage, "File Storage", "File Storage", "Stores multimedia lesson assets and generated barcode-verifiable certificates.")
+System_Boundary(spt, "SPT Platform") {
+    Container(web, "Web Application", "Laravel + Vue", "Screens and logic for learning, content, and accounts")
+    ContainerDb(db, "Database", "TiDB Cloud", "Users, modules, progress, scores")
+    ContainerDb(files, "File Storage", "AWS S3", "Module files and certificates")
 }
 
-System_Ext(aiChatbot, "AI Chatbot API", "Approved external AI service providing real-time, module-scoped tutoring and content referencing.")
+System_Ext(chatbot, "AI Chatbot", "Lesson guidance")
+System_Ext(email, "Email Service", "Brevo")
+System_Ext(auth, "Google Authenticator", "2FA codes")
 
-' Users to Web Application (Combined Core and Extended Use Cases)
-Rel(trainees, webApp, "Manages account (register/login, 2FA, edit info, password reset, delete), learns modules, views progress\n<<extend>> Takes final assessments", "HTTPS")
-Rel(supervisor, webApp, "Manages account, manages active content, filters progress reports\n<<extend>> Creates/manages specific modules", "HTTPS")
-Rel(admin, webApp, "Manages own account, monitors platform health and configuration\n<<extend>> Manages other user accounts (lock/disable/reinstate)", "HTTPS")
+Rel(trainee, web, "Uses", "HTTPS")
+Rel(supervisor, web, "Uses", "HTTPS")
+Rel(admin, web, "Uses", "HTTPS")
 
-' Web Application to External AI (Combined Send/Receive)
-Rel(webApp, aiChatbot, "Forwards in-scope trainee questions and curriculum context\n<-- Returns scoped educational responses", "API / JSON")
+Rel(web, db, "Reads and writes")
+Rel(web, files, "Stores and gets files")
+Rel(web, chatbot, "Asks questions")
+Rel(web, email, "Sends emails")
+Rel(web, auth, "Checks 2FA code")
 
-' Internal Storage
-Rel(webApp, db, "Reads/writes accounts, module structures, scores, progress, and logs", "SQL / Eloquent ORM")
-Rel(webApp, fileStorage, "Retrieves lesson media and stores certificates", "File I/O")
-
-SHOW_LEGEND()
 @enduml
