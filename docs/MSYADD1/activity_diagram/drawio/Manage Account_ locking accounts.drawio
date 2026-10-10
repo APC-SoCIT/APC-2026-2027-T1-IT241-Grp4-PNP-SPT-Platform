@@ -1,0 +1,47 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="bybwqg-dj3LIzhvJ5no8">
+    <mxGraphModel dx="1178" dy="653" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cShkAdVuhMy98dQ9h1Cw-1" parent="1" style="swimlane;whiteSpace=wrap;startSize=23;labelBackgroundColor=none;" value="Admin" vertex="1">
+          <mxGeometry height="372" width="280" x="354.5" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="GrSpvMHYl4-mfsgfOjWk-1" edge="1" parent="cShkAdVuhMy98dQ9h1Cw-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=none;fontColor=default;" target="cShkAdVuhMy98dQ9h1Cw-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="115" y="69.99999999999989" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="GrSpvMHYl4-mfsgfOjWk-3" edge="1" parent="cShkAdVuhMy98dQ9h1Cw-1" source="cShkAdVuhMy98dQ9h1Cw-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=none;fontColor=default;" target="GrSpvMHYl4-mfsgfOjWk-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cShkAdVuhMy98dQ9h1Cw-5" parent="cShkAdVuhMy98dQ9h1Cw-1" style="labelBackgroundColor=none;" value="Select Target Account" vertex="1">
+          <mxGeometry height="48" width="130" x="50" y="102" as="geometry" />
+        </mxCell>
+        <mxCell id="GrSpvMHYl4-mfsgfOjWk-2" parent="cShkAdVuhMy98dQ9h1Cw-1" style="labelBackgroundColor=none;" value="Set Status &#xa;(Lock/Unlock/Reinstate)" vertex="1">
+          <mxGeometry height="48" width="130" x="50" y="192" as="geometry" />
+        </mxCell>
+        <mxCell id="GrSpvMHYl4-mfsgfOjWk-10" parent="cShkAdVuhMy98dQ9h1Cw-1" style="ellipse;fillColor=strokeColor;html=1;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="100" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="cShkAdVuhMy98dQ9h1Cw-10" parent="1" style="swimlane;whiteSpace=wrap;labelBackgroundColor=none;" value="SPT-Platform" vertex="1">
+          <mxGeometry height="372" width="280" x="634.5" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="GrSpvMHYl4-mfsgfOjWk-8" edge="1" parent="cShkAdVuhMy98dQ9h1Cw-10" source="GrSpvMHYl4-mfsgfOjWk-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=none;fontColor=default;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="140" y="322" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="GrSpvMHYl4-mfsgfOjWk-5" parent="cShkAdVuhMy98dQ9h1Cw-10" style="labelBackgroundColor=none;" value="Apply Access Change&#xa;&amp; Audit" vertex="1">
+          <mxGeometry height="48" width="130" x="75" y="192" as="geometry" />
+        </mxCell>
+        <mxCell id="GrSpvMHYl4-mfsgfOjWk-11" parent="cShkAdVuhMy98dQ9h1Cw-10" style="ellipse;html=1;shape=endState;fillColor=strokeColor;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="125" y="322" as="geometry" />
+        </mxCell>
+        <mxCell id="GrSpvMHYl4-mfsgfOjWk-6" edge="1" parent="1" source="GrSpvMHYl4-mfsgfOjWk-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=none;fontColor=default;" target="GrSpvMHYl4-mfsgfOjWk-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
