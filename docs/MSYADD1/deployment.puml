@@ -1,0 +1,74 @@
+@startuml Deployment_Development
+!include <C4/C4_Deployment>
+
+HIDE_STEREOTYPE()
+skinparam ArrowThickness 2
+
+AddElementTag("built", $bgColor="#FFFFFF", $fontColor="#1168BD", $borderColor="#1168BD", $borderThickness="3")
+AddElementTag("email", $bgColor="#FFFFFF", $fontColor="#C00000", $borderColor="#C00000", $borderThickness="3")
+AddElementTag("planned", $bgColor="#FFFFFF", $fontColor="#F58A00", $borderColor="#F58A00", $borderStyle=DashedLine(), $borderThickness="3")
+
+AddRelTag("dashed", $textColor="#444444", $lineColor="#444444", $lineStyle=DashedLine(), $lineThickness="2")
+
+left footer Deployment View: SPT Platform - Development\nAn example of the SPT Platform testing setup before handover to PNP
+
+Deployment_Node(internet, "Internet", "Deployment Node") {
+
+    Deployment_Node(device, "User's Device", "Laptop or phone") {
+        Deployment_Node(browser, "Web Browser", "Chrome, Edge, Safari, or Firefox") {
+            Container(ui, "Web Pages", "Vue and Inertia", "Screens for learning, content, and accounts.", $tags="built")
+        }
+    }
+
+    Deployment_Node(phone, "User's Phone", "Mobile device") {
+        Deployment_Node(authnode, "Google Authenticator", "Mobile app") {
+            System_Ext(authapp, "2FA Codes", "Shows the 6-digit login code. Planned.", $tags="planned")
+        }
+    }
+
+    Deployment_Node(render, "Render", "Cloud hosting") {
+        Deployment_Node(docker, "Docker Container", "Deployment Node") {
+            Deployment_Node(nginx, "Nginx + PHP-FPM", "Deployment Node") {
+                Container(app, "Web Application", "Laravel 11, PHP 8.2", "Handles logins, lessons, exams, certificates, and content.", $tags="built")
+            }
+        }
+    }
+
+    Deployment_Node(aiprovider, "Third-Party AI Provider", "Deployment Node") {
+        Deployment_Node(aimodel, "AI Model Service", "Open-source model (e.g., Llama)") {
+            System_Ext(chatbot, "AI Chatbot", "Answers questions using approved lesson content only. Planned.", $tags="planned")
+        }
+    }
+
+    Deployment_Node(aws, "Amazon Web Services", "Deployment Node") {
+        Deployment_Node(s3, "S3 Private Bucket", "Public access blocked") {
+            ContainerDb(files, "File Storage", "Amazon S3", "Module files and certificate PDFs.", $tags="built")
+        }
+    }
+
+    Deployment_Node(tidbcloud, "TiDB Cloud", "Deployment Node") {
+        Deployment_Node(tidb, "Database Server", "TiDB Serverless") {
+            ContainerDb(db, "Database", "MySQL-compatible", "Users, modules, progress, and scores.", $tags="built")
+        }
+    }
+
+    Deployment_Node(brevoNode, "Brevo", "Deployment Node") {
+        Deployment_Node(smtp, "SMTP Relay", "smtp-relay.brevo.com") {
+            System_Ext(email, "Email Service", "Sends verification and reset emails.", $tags="email")
+        }
+    }
+}
+
+' Layout: top row = device + phone, middle = app + AI, bottom = files, database, email
+Lay_R(ui, authapp)
+Lay_R(files, db)
+Lay_R(db, email)
+
+Rel_D(ui, app, "Makes requests to", "HTTPS", $tags="dashed")
+Rel_U(app, authapp, "Verifies codes from", "6-digit code", $tags="dashed")
+Rel_R(app, chatbot, "Sends lesson questions to", "HTTPS", $tags="dashed")
+Rel_D(app, files, "Reads from and writes to", "S3 API/HTTPS", $tags="dashed")
+Rel_D(app, db, "Reads from and writes to", "MySQL protocol", $tags="dashed")
+Rel_D(app, email, "Sends emails using", "SMTP", $tags="dashed")
+
+@enduml
